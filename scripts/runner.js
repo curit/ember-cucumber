@@ -149,6 +149,10 @@
 
     $('#app-under-test').load(function () {
         testWindow = window.frames[0].window;
+        testWindow.$('body').ready(function(){
+            $(this).css('zoom', '0.6');
+        });
+        window.frames[0].window.$('body').css('zoom', '0.6')
         testWindow.App.injectTestHelpers();
         testWindow.Ember.testing = false;
         var CucumberAdapter = testWindow.Ember.Test.Adapter.extend({
