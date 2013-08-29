@@ -4,11 +4,10 @@
 var chai = require('chai'),
     expect = chai.expect,
     chaiAsPromised = require('chai-as-promised');
-    //getTan = require('../support/tan.js');
 
 chai.use(chaiAsPromised);
 
-// find en findWithAssert retourneren geen promise maar en element
+// find and findWithAssert do not return a promise but an element
 
 var WorldConstructor = function WorldConstructor(callback) {
 
