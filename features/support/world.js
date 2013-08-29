@@ -49,24 +49,8 @@ var WorldConstructor = function WorldConstructor(callback) {
             app.fillIn('#username', userName)
                 .then(done);
         },
-        requestTan: function (done) {
-            app.click('#requestTancode')// gaat te snel.then(done);
-                .wait();
-            app.setTimeout(done, 500);
-        },
-        shouldReceiveAndAcceptTancodeSuccessMessage: function (done) {
-            expect(app.find('.alert-success').length)
-                .to.equal(1);
-            app.click('#confirm-success')
-                .then(done);
-        },
         enterPassword: function (password, done) {
             app.fillIn('#password', password)
-                .then(done);
-        },
-        enterTancode: function (done) {
-            var tancode = getTan('00a096299601');
-            app.fillIn('#tan', tancode)
                 .then(done);
         },
         fillIn: function (fieldName, value, done) {
