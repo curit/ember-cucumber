@@ -16,6 +16,23 @@ var WorldConstructor = function WorldConstructor(callback) {
     app = window.frames[0].window;
 
     dsl = {
+        ensureUser: function (email, password, done) {
+            app.Ember.$().ajax({
+                url: '/sessions',
+                type: 'POST',
+                dataType: 'json',
+                data: {email: email, password: password}
+            }).fail(fuction() {
+                app.Ember.$().ajax({
+                    url: '/users',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {email: email, password: password, passwordConfirmation: password}
+                });
+            }).done(function {
+                done();
+            };
+        },
         noOneLoggedIn: function (done) {
             expect(app.App.Auth.get('signedIn'))
                 .to.be.false;
