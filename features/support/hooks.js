@@ -7,6 +7,7 @@ var myHooks = function () {
 
     this.Before(function (callback) {
         //app.App.reset();
+        //app.App.Em.$('.signout').click();
         callback();
     });
 

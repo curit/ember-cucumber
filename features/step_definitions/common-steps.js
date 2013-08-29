@@ -4,15 +4,15 @@
 var commonStepDefinitionsWrapper = function () {
 
     var PATH_MAP = {
-      'signup': '/#/users/new',
-      'signin': '/#/sessions/new',
+      'sign up': '/#/users/new',
+      'sign in': '/#/sessions/new',
       'task list': '/#/tasks/index'
     }
 
     // this in een stepdef verwijst naar this.World
     this.World = require("../support/world.js").World;
 
-    this.Given(/^(?:|I )go on ([^\"]+) page$/, function (pageName, callback) {
+    this.Given(/^(?:|I )go on "([^\"]+)" page$/, function (pageName, callback) {
         this.visitPage(PATH_MAP[pageName.toLowerCase()], callback);
     });
 
@@ -31,7 +31,12 @@ var commonStepDefinitionsWrapper = function () {
 
     this.Then(/^I (?:am redirected|stay) on "([^\"]+)" page$/, function (pageName, callback) {
         // sleep 1
-        expect(this.currentLocation().hash).to.equal(PATH_MAP[pageName.toLowerCase().slice(1)])
+        this.expectHashToBe(pageName, callback);
+        // expect(this.currentHash()).to.equal()
+    });
+
+    this.Then(/^(?:|I )see a validation error$/, function (callback) {
+        this.shouldShowValidationError(callback);
     });
     
     this.Given(/^I am signed in$/, function (callback) {

@@ -17,19 +17,24 @@ var WorldConstructor = function WorldConstructor(callback) {
 
     dsl = {
         ensureUser: function (email, password, done) {
-            app.Ember.$().ajax({
-                url: '/sessions',
+            app.Ember.$.ajax({
+                url: '/users',
                 type: 'POST',
                 dataType: 'json',
-                data: {email: email, password: password}
-            }).fail(function() {
-                app.Ember.$().ajax({
-                    url: '/users',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {email: email, password: password, passwordConfirmation: password}
-                });
-            }).then(done);
+                data: {email: email, password: password, passwordConfirmation: password},
+                timeout: 10
+            }).always(function() {
+                done();
+            });
+            // app.Ember.$.ajax({
+            //     url: '/sessions',
+            //     type: 'POST',
+            //     dataType: 'json',
+            //     data: {email: email, password: password},
+            //     timeout: 10
+            // }).fail(function() {
+
+            // }).done(function (){ done(); });
         },
         noOneLoggedIn: function (done) {
             expect(app.App.Auth.get('signedIn'))
@@ -82,6 +87,18 @@ var WorldConstructor = function WorldConstructor(callback) {
             expect(app.find('li > span:contains(taskName)').hasClass(priority))
                 .to.be.true;
         };
+        currentHash: function() {
+            app.location.hash;
+        },
+        expectHashToBe: function(expected, done) {
+            expect(app.location.hash).to.equal(expected);
+            done();
+        },
+        shouldShowValidationError: function (done) {
+            expect(app.find('.control-group.error').length)
+                .to.equal(1);
+            done();
+        }
     };
 
     callback(dsl);
