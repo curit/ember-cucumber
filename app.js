@@ -69,7 +69,8 @@ var buildSupportCode = function (cb) {
         if (err) {
             throw err;
         } else {
-            filePaths = fileNames.map(function (item) {
+            filePaths = fileNames.filter(function(item){ return item.substr(item.length - 3, item.length) == ".js"; })
+            .map(function (item) {
                 return "../features/step_definitions/" + item;
             });
             filePaths.push("../features/support/hooks.js");
