@@ -1,0 +1,212 @@
+/*jslint node: true */
+'use strict';
+/**
+ * Module dependencies.
+ */
+
+var express = require('../node_modules/express'),
+    http = require('http'),
+    path = require('path'),
+    fs = require('fs'),
+    browserify = require('../node_modules/browserify'),
+    httpProxy = require('../node_modules/http-proxy'),
+    app = express(),
+    proxy = new httpProxy.RoutingProxy();
+
+// all environments
+app.set('port', process.env.PORT || 1337);
+app.set('views', __dirname + '/views');
+app.set('view options', { layout: false });
+app.set('view engine', 'jade');
+app.use(express.favicon());
+app.use(express.logger('dev'));
+app.use(express.bodyParser());
+app.use(express.methodOverride());
+app.use(app.router);
+
+
+// development only
+if ('development' === app.get('env')) {
+    app.use(express.errorHandler());
+}
+
+
+var readFeatureFiles = function () {
+    var features = [],
+        files = fs.readdirSync('../acceptance/features'),
+        p,
+        i,
+        stats;
+
+    for (i = 0; i < files.length; i = i + 1) {
+        p = "../acceptance/features/" + files[i];
+        stats = fs.statSync(p);
+        if (stats.isFile() && path.extname(p) === ".feature") {
+            fs.readFile(p, {encoding: "utf-8"}, function(err, data) {
+                features.push(data);
+            });
+        }
+    }
+    return features;
+};
+var features = readFeatureFiles();
+
+var getRequires = function (fileNames, acc) {
+    if (fileNames.length > 0) {
+        var fileName = fileNames.pop();
+        if (fileName !== "index.js") {
+            return getRequires(fileNames, acc + "require('" + fileName + "').call(this);");
+        }
+        return getRequires(fileNames, acc);
+    }
+    return acc;
+};
+//
+//var index = function (path, cb) {
+//    fs.readdir(path, function (err, fileNames) {
+//        if (err) { throw err; }
+//        cb(code(fileNames, ""));
+//    });
+//};
+
+var buildSupportCode = function (cb) {
+    var src = "module.exports = function () {";
+
+    fs.readdir('../acceptance/steps', function (err, fileNames) {
+        var filePaths;
+
+        if (err) {
+            throw err;
+        } else {
+            filePaths = fileNames.map(function (item) {
+                return "../steps/" + item;
+            });
+            filePaths.push("../support/hooks.js");
+            fs.writeFile('../acceptance/tmp/supportCode.js',
+                    getRequires(filePaths, src) + "};",
+                    function (err) {
+                    if (err) {
+                        throw err;
+                    }
+                    cb();
+                });
+        }
+    });
+
+
+
+};
+
+// todo: cleanup and make async
+// todo: support multiple step files
+//var browserifySteps = function (cb) {
+//      var b = browserify({
+//          entries: [
+//              '../acceptance/steps/user-authentication.js',
+//              '../acceptance/steps/view-results.js',
+//              '../acceptance/support/hooks.js',
+//              '../acceptance/support/world.js',
+//              '../acceptance/support/tan.js'
+//          ]});
+//    b.require('../acceptance/steps/user-authentication.js', {expose: 'supportCode'});
+//    b.bundle({},function(err, src){
+//        if (err) throw err;
+//        fs.writeFile('./scripts/support.js', src, function(err){
+//            if (err) throw err;
+//            cb();
+//        });
+//    });
+//    index('./steps', function(str){
+//        var f = "module.exports=(function(){"+str+"})";
+//        fs.writeFile('./steps/index.js',f, function () {
+//            var b = browserify({entries: './steps/index.js'});
+//            b.require('./steps/index.js', {expose: 'steps'});
+//            b.bundle({},function(err, src){
+//                if (err) throw err;
+//                fs.writeFile('./public/javascripts/support.js', src, function(err){
+//                    if (err) throw err;
+//                    cb();
+//                });
+//            });
+//        });
+//    });
+//};
+
+var browserifyCucumber = function (cb) {
+    var b = browserify({
+        entries: [
+            '../node_modules/cucumber/node_modules/underscore/underscore.js',
+            '../node_modules/cucumber/node_modules/gherkin/lib/gherkin.js',
+            '../node_modules/cucumber/lib/cucumber.js',
+            '../node_modules/cucumber/node_modules/gherkin/lib/gherkin/lexer/en.js'
+        ]
+    });
+
+    b.ignore('./cucumber/cli');
+    b.ignore('connect');
+
+    b.require('../node_modules/cucumber/node_modules/cucumber-html',{expose: 'cucumberHTML'});
+    b.require('cucumber');
+
+    b.bundle({},function(err, src){
+        if (err) throw err;
+        fs.writeFile('./scripts/cucumber.js', src, function (err) {
+            if (err) throw err;
+            cb();
+        });
+    });
+};
+
+app.get('/acceptance/scripts/support.js', function (req, res) {
+    res.set('Content-Type', 'application/javascript');
+    buildSupportCode(function () {
+        var b = browserify({entries: ['../acceptance/tmp/supportCode.js']});
+        b.require('../acceptance/tmp/supportCode.js', {expose: 'supportCode'});
+        console.log(b);
+        b.bundle({}, function (err, src) {
+            if (err) {
+                throw err;
+            } else {
+                res.send(src);
+            }
+        });
+    });
+});
+
+app.get('/acceptance/scripts/cucumber.js', function (req, res) {
+    if (false) {
+        browserifyCucumber( function() {
+            res.sendfile('./scripts/cucumber.js');
+        });
+    } else {
+        res.sendfile('./scripts/cucumber.js');
+    }
+});
+
+app.get('/acceptance/scripts/runner.js', function (req, res) {
+    res.sendfile('./scripts/runner.js');
+});
+
+app.get('/acceptance/styles/acceptance.css', function (req, res) {
+    res.sendfile('./styles/acceptance.css');
+});
+
+
+app.get('/acceptance', function (req, res) {
+    res.render('acceptance', {
+        features: features
+    });
+});
+
+
+// proxy the app under test to avoid cross-origin issues with the iframe
+app.all('/*', function(req, res) {
+    return proxy.proxyRequest(req, res, {
+        host: 'localhost',
+        port: 9000
+    });
+});
+
+http.createServer(app).listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});

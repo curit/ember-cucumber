@@ -1,0 +1,23 @@
+doctype 5
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/acceptance/styles/acceptance.css')
+    body
+        .cucumber
+            each feature in features
+                script(type='text/x-gherkin')= feature
+            p.actions
+                | test
+                | &nbsp;
+                button#run run
+                | &nbsp;
+
+            #output.cucumber-report
+            #errors-container
+                pre#errors
+        iframe(id='app-under-test', src="/")
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js")
+        script(src="/acceptance/scripts/cucumber.js")
+        script(src="/acceptance/scripts/support.js")
+        script(src="/acceptance/scripts/runner.js")
