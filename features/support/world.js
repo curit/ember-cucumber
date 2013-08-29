@@ -3,8 +3,8 @@
 
 var chai = require('chai'),
     expect = chai.expect,
-    chaiAsPromised = require('chai-as-promised'),
-    getTan = require('../support/tan.js');
+    chaiAsPromised = require('chai-as-promised');
+    //getTan = require('../support/tan.js');
 
 chai.use(chaiAsPromised);
 

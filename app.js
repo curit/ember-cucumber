@@ -73,16 +73,16 @@ var getRequires = function (fileNames, acc) {
 var buildSupportCode = function (cb) {
     var src = "module.exports = function () {";
 
-    fs.readdir('features/step_definitions', function (err, fileNames) {
+    fs.readdir('./features/step_definitions', function (err, fileNames) {
         var filePaths;
 
         if (err) {
             throw err;
         } else {
             filePaths = fileNames.map(function (item) {
-                return "features/step_definitions/" + item;
+                return "../features/step_definitions/" + item;
             });
-            filePaths.push("features/support/hooks.js");
+            filePaths.push("../features/support/hooks.js");
             fs.writeFile('tmp/supportCode.js',
                     getRequires(filePaths, src) + "};",
                     function (err) {
