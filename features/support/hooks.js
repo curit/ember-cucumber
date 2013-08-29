@@ -15,9 +15,9 @@ var myHooks = function () {
         callback();
     });
 
-    this.Around(function (callback) {
-        callback();
-    });
+    // this.Around(function (callback) {
+    //     callback();
+    // });
 };
 
 module.exports = myHooks;
