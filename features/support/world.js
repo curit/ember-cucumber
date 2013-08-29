@@ -88,7 +88,16 @@ var WorldConstructor = function WorldConstructor(callback) {
         },
         currentLocation: function() {
             app.location;
-        }
+        },
+        checkSignedIn: function (done) {
+            expect(app.App.__container__.lookup('controller:currentSession').get('isSignedIn'))
+                .to.be.true;
+            done();
+        },
+        checkTask: function (taskName, priority, callback){
+            expect(app.find('li > span:contains(taskName)').hasClass(priority))
+                .to.be.true;
+        };
     };
 
     callback(dsl);

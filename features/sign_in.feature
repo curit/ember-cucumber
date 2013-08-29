@@ -6,7 +6,7 @@ Feature: Sign in
 
 
   Scenario: Success
-    Given I go on "Sign in" page
+    Given I go on "Signin" page
     And I am registered with email "joe@doe.com" and password "123456"
     When I fill in "Email" field with "joe@doe.com"
     And fill in "Password" field with "123456"

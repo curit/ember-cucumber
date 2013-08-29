@@ -33,7 +33,16 @@ var commonStepDefinitionsWrapper = function () {
         // sleep 1
         expect(this.currentLocation().hash).to.equal(PATH_MAP[pageName.toLowerCase().slice(1)])
     });
+    
+    this.Given(/^I am signed in$/, function (callback) {
+        this.checkSignedIn(callback);
+    });
 
+    this.Then(/^I see task "([^\"]+)" with priority "([^\"]+)" in my taks list$/, function (taskName, priority, callback) {
+        this.checkTask(taskName, priority, callback);
+    });
+
+    
 
     // this.Given(/^no one is logged in$/, function (callback) {
     //     this.noOneLoggedIn(callback);
