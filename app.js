@@ -1,8 +1,5 @@
 /*jslint node: true */
 'use strict';
-/**
- * Module dependencies.
- */
 
 var express = require('express'),
     http = require('http'),
@@ -62,13 +59,6 @@ var getRequires = function (fileNames, acc) {
     }
     return acc;
 };
-//
-//var index = function (path, cb) {
-//    fs.readdir(path, function (err, fileNames) {
-//        if (err) { throw err; }
-//        cb(code(fileNames, ""));
-//    });
-//};
 
 var buildSupportCode = function (cb) {
     var src = "module.exports = function () {";
@@ -97,41 +87,6 @@ var buildSupportCode = function (cb) {
 
 
 };
-
-// todo: cleanup and make async
-// todo: support multiple step files
-//var browserifySteps = function (cb) {
-//      var b = browserify({
-//          entries: [
-//              '../acceptance/steps/user-authentication.js',
-//              '../acceptance/steps/view-results.js',
-//              '../acceptance/support/hooks.js',
-//              '../acceptance/support/world.js',
-//              '../acceptance/support/tan.js'
-//          ]});
-//    b.require('../acceptance/steps/user-authentication.js', {expose: 'supportCode'});
-//    b.bundle({},function(err, src){
-//        if (err) throw err;
-//        fs.writeFile('./scripts/support.js', src, function(err){
-//            if (err) throw err;
-//            cb();
-//        });
-//    });
-//    index('./steps', function(str){
-//        var f = "module.exports=(function(){"+str+"})";
-//        fs.writeFile('./steps/index.js',f, function () {
-//            var b = browserify({entries: './steps/index.js'});
-//            b.require('./steps/index.js', {expose: 'steps'});
-//            b.bundle({},function(err, src){
-//                if (err) throw err;
-//                fs.writeFile('./public/javascripts/support.js', src, function(err){
-//                    if (err) throw err;
-//                    cb();
-//                });
-//            });
-//        });
-//    });
-//};
 
 var browserifyCucumber = function (cb) {
     var b = browserify({
