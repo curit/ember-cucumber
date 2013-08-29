@@ -160,8 +160,8 @@ app.get('/acceptance', function (req, res) {
 // proxy the app under test to avoid cross-origin issues with the iframe
 app.all('/*', function(req, res) {
     return proxy.proxyRequest(req, res, {
-        host: 'localhost',
-        port: 3000,
+        host: 'todohq.heroku.com',
+        port: 80,
         changeOrigin: true
     });
 });
