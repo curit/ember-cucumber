@@ -4,22 +4,31 @@
 var commonStepDefinitionsWrapper = function () {
 
     var PATH_MAP = {
-      'sign up' => '/#/users/new',
-      'sign in' => '/#/sessions/new',
-      'task list' => '/#/tasks/index'
+      'sign up': '/#/users/new',
+      'sign in': '/#/sessions/new',
+      'task list': '/#/tasks/index'
     }
 
     // this in een stepdef verwijst naar this.World
     this.World = require("../support/world.js").World;
 
     this.Given(/^(?:|I )go on "([^\"]+)" page$/, function (pageName, callback) {
-      this.visitPage(PATH_MAP[pageName.toLowerCase()], callback);
+        this.visitPage(PATH_MAP[pageName.toLowerCase()], callback);
     });
 
 
     this.Given(/^I am registered with email "([^\"]+)" and password "([^\"]+)"$/, function (email, password, callback) {
-      this.ensureUser(email, password, callback);
+        this.ensureUser(email, password, callback);
     });
+
+    this.When(/^(?:|I )fill in "([^\"]+)" field with "([^\"]+)"$/, function (fieldName, value, callback) {
+        this.fillIn(fieldName, value, callback);
+    }
+
+    this.When(/^(?:|I )submit the form$/, function (callback) {
+        this.submitForm(callback);
+    }
+
 
     this.Given(/^no one is logged in$/, function (callback) {
         this.noOneLoggedIn(callback);

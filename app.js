@@ -16,7 +16,7 @@ app.set('views', __dirname + '/views');
 app.set('view options', { layout: false });
 app.set('view engine', 'jade');
 app.use(express.favicon());
-app.use(express.logger('dev')); 
+app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
@@ -159,8 +159,8 @@ app.get('/acceptance', function (req, res) {
 // proxy the app under test to avoid cross-origin issues with the iframe
 app.all('/*', function(req, res) {
     return proxy.proxyRequest(req, res, {
-        host: 'todohq.herokuapp.com',
-        port: 80,
+        host: 'localhost',
+        port: 3000,
         changeOrigin: true
     });
 });

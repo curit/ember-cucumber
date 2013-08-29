@@ -22,16 +22,14 @@ var WorldConstructor = function WorldConstructor(callback) {
                 type: 'POST',
                 dataType: 'json',
                 data: {email: email, password: password}
-            }).fail(fuction() {
+            }).fail(function() {
                 app.Ember.$().ajax({
                     url: '/users',
                     type: 'POST',
                     dataType: 'json',
                     data: {email: email, password: password, passwordConfirmation: password}
                 });
-            }).done(function {
-                done();
-            };
+            }).then(done);
         },
         noOneLoggedIn: function (done) {
             expect(app.App.Auth.get('signedIn'))
@@ -71,15 +69,25 @@ var WorldConstructor = function WorldConstructor(callback) {
             app.fillIn('#tan', tancode)
                 .then(done);
         },
+        fillIn: function (fieldName, value, done) {
+            app.fillIn(fieldName, value).then(done);
+        },
         clickLogin: function (done) {
             app.click('#login');
 
+            app.setTimeout(done, 500);
+        },
+        submitForm: function (done) {
+            app.click("button[type='submit']");
             app.setTimeout(done, 500);
         },
         shouldBeLoggedIn: function (done) {
             expect(app.App.Auth.get('signedIn'))
                 .to.be.true;
             done();
+        },
+        currentLocation: function() {
+            app.location;
         }
     };
 
