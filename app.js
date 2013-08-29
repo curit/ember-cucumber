@@ -4,12 +4,12 @@
  * Module dependencies.
  */
 
-var express = require('../node_modules/express'),
+var express = require('express'),
     http = require('http'),
     path = require('path'),
     fs = require('fs'),
-    browserify = require('../node_modules/browserify'),
-    httpProxy = require('../node_modules/http-proxy'),
+    browserify = require('browserify'),
+    httpProxy = require('http-proxy'),
     app = express(),
     proxy = new httpProxy.RoutingProxy();
 
@@ -19,7 +19,7 @@ app.set('views', __dirname + '/views');
 app.set('view options', { layout: false });
 app.set('view engine', 'jade');
 app.use(express.favicon());
-app.use(express.logger('dev'));
+app.use(express.logger('dev')); 
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
@@ -33,13 +33,13 @@ if ('development' === app.get('env')) {
 
 var readFeatureFiles = function () {
     var features = [],
-        files = fs.readdirSync('../acceptance/features'),
+        files = fs.readdirSync('./features'),
         p,
         i,
         stats;
 
     for (i = 0; i < files.length; i = i + 1) {
-        p = "../acceptance/features/" + files[i];
+        p = "./features/" + files[i];
         stats = fs.statSync(p);
         if (stats.isFile() && path.extname(p) === ".feature") {
             fs.readFile(p, {encoding: "utf-8"}, function(err, data) {
@@ -52,6 +52,7 @@ var readFeatureFiles = function () {
 var features = readFeatureFiles();
 
 var getRequires = function (fileNames, acc) {
+    console.log(fileNames);
     if (fileNames.length > 0) {
         var fileName = fileNames.pop();
         if (fileName !== "index.js") {
@@ -72,17 +73,17 @@ var getRequires = function (fileNames, acc) {
 var buildSupportCode = function (cb) {
     var src = "module.exports = function () {";
 
-    fs.readdir('../acceptance/steps', function (err, fileNames) {
+    fs.readdir('features/step_definitions', function (err, fileNames) {
         var filePaths;
 
         if (err) {
             throw err;
         } else {
             filePaths = fileNames.map(function (item) {
-                return "../steps/" + item;
+                return "features/step_definitions/" + item;
             });
-            filePaths.push("../support/hooks.js");
-            fs.writeFile('../acceptance/tmp/supportCode.js',
+            filePaths.push("features/support/hooks.js");
+            fs.writeFile('tmp/supportCode.js',
                     getRequires(filePaths, src) + "};",
                     function (err) {
                     if (err) {
@@ -135,17 +136,17 @@ var buildSupportCode = function (cb) {
 var browserifyCucumber = function (cb) {
     var b = browserify({
         entries: [
-            '../node_modules/cucumber/node_modules/underscore/underscore.js',
-            '../node_modules/cucumber/node_modules/gherkin/lib/gherkin.js',
-            '../node_modules/cucumber/lib/cucumber.js',
-            '../node_modules/cucumber/node_modules/gherkin/lib/gherkin/lexer/en.js'
+            './node_modules/cucumber/node_modules/underscore/underscore.js',
+            './node_modules/cucumber/node_modules/gherkin/lib/gherkin.js',
+            './node_modules/cucumber/lib/cucumber.js',
+            './node_modules/cucumber/node_modules/gherkin/lib/gherkin/lexer/en.js'
         ]
     });
 
     b.ignore('./cucumber/cli');
     b.ignore('connect');
 
-    b.require('../node_modules/cucumber/node_modules/cucumber-html',{expose: 'cucumberHTML'});
+    b.require('./node_modules/cucumber/node_modules/cucumber-html',{expose: 'cucumberHTML'});
     b.require('cucumber');
 
     b.bundle({},function(err, src){
@@ -160,8 +161,9 @@ var browserifyCucumber = function (cb) {
 app.get('/acceptance/scripts/support.js', function (req, res) {
     res.set('Content-Type', 'application/javascript');
     buildSupportCode(function () {
-        var b = browserify({entries: ['../acceptance/tmp/supportCode.js']});
-        b.require('../acceptance/tmp/supportCode.js', {expose: 'supportCode'});
+        console.log("./tmp/supportCode.js");
+        var b = browserify({entries: ['./tmp/supportCode.js']});
+        b.require('./tmp/supportCode.js', {expose: 'supportCode'});
         console.log(b);
         b.bundle({}, function (err, src) {
             if (err) {
@@ -202,8 +204,9 @@ app.get('/acceptance', function (req, res) {
 // proxy the app under test to avoid cross-origin issues with the iframe
 app.all('/*', function(req, res) {
     return proxy.proxyRequest(req, res, {
-        host: 'localhost',
-        port: 9000
+        host: 'todohq.herokuapp.com',
+        port: 80,
+        changeOrigin: true
     });
 });
 
