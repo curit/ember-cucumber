@@ -1,3 +1,5 @@
+# DEPRECATED see: https://www.npmjs.com/package/ember-cli-yadda 
+
 ember-cucumber
 ==============
 
